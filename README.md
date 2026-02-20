@@ -1,4 +1,4 @@
-# CS 553 Case Study 1
+# CS 553 Case Study 2
 
 ## Team Members
 - Sai Teja Sunku
