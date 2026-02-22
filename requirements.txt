@@ -7,3 +7,4 @@ streamlit
 huggingface_hub
 accelerate
 dotenv
+fastapi 
