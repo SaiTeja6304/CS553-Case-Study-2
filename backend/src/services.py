@@ -4,9 +4,9 @@ import io
 import base64
 from PIL import Image
 import os
-import time
 from dotenv import load_dotenv
-from db import create_connection, create_table, insert_log, close_connection
+from fastapi import UploadFile 
+from backend.src.db import create_connection, create_table, insert_log, close_connection
 
 load_dotenv()
 
@@ -15,10 +15,10 @@ HF_TOKEN = os.getenv("HF_TOKEN")
 conn, cursor = create_connection()
 create_table(conn, cursor)
 
-def generate_response_local(input_img, query, using_local_model, chat_history):
-
+async def generate_response_local(input_img: UploadFile, query: str, using_local_model: bool, chat_history: str):
+   
     #streamlit input to PIL image
-    img = Image.open(input_img)
+    img = Image.open(input_img.file).convert("RGB")
 
     #Changing the PIL image to bytes so we can pass it into the message
     buffer = io.BytesIO()
@@ -74,10 +74,10 @@ def generate_response_local(input_img, query, using_local_model, chat_history):
     return result
 
 
-def generate_response_api(input_img, query, using_local_model, chat_history):
+async def generate_response_api(input_img: UploadFile, query: str, using_local_model: bool, chat_history: str):
 
     #streamlit input to PIL image
-    img = Image.open(input_img)
+    img = Image.open(input_img.file).convert("RGB")
 
     #Changing the PIL image to bytes so we can pass it into the message
     buffer = io.BytesIO()
@@ -126,5 +126,4 @@ def generate_response_api(input_img, query, using_local_model, chat_history):
     }
 
     return result
-
-close_connection(conn, cursor)
+    

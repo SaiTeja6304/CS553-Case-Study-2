@@ -1,12 +1,11 @@
 import streamlit as st
-import response as rp
 import requests
 
 st.set_page_config(page_title="VLM Chat", page_icon=":robot_face:", layout="wide")
 st.title("VLM Chat")
 
 API_PORT = "9011"
-API_SERVER = f"http://localhost/"
+API_SERVER = f"http://localhost:9011"
 HTTP_MAX_TIMEOUT_SECONDS = "600"
 
 if "chat_history" not in st.session_state:
@@ -42,15 +41,19 @@ if query:
             chat_history_str = "\n".join([f"{role}: {msg}" for role, msg in st.session_state.chat_history])
             
             if use_local_model:
-                response = requests.post(API_SERVER + "api/generate-response-local", 
-                files={"image": image}, data={"query": query, "chat_history": chat_history_str})
+                response = requests.post(API_SERVER + "/api/generate-response-local", 
+                files={"input_img": image}, 
+                data={"query": query, "chat_history": chat_history_str})
             else:
-                response = requests.post(API_SERVER + "api/generate-response-api", 
-                files={"image": image}, data={"query": query, "chat_history": chat_history_str})
+                response = requests.post(API_SERVER + "/api/generate-response-api", 
+                files={"input_img": image}, 
+                data={"query": query, "chat_history": chat_history_str})
         
-        st.chat_message("assistant").markdown(response)
+        if response.status_code == 200:
+            st.chat_message("assistant").markdown(response.json()["response"])
+            st.session_state.chat_history.append(("user", query))
+            st.session_state.chat_history.append(("assistant", response.json()["response"]))
+        else:
+            st.error(response.json().get("detail", "Unknown error"))
 
-        # Add to history after successful response
-        st.session_state.chat_history.append(("user", query))
-        st.session_state.chat_history.append(("assistant", response))
-
+# streamlit run frontend/streamlit_app.py --server.port 7011 --server.address 0.0.0.0
