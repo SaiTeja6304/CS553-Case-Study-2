@@ -23,30 +23,34 @@ echo "Copying frontend files to remote server..."
 "${SSH_BASE[@]}" "rm -rf \"${REMOTE_DIR}\" && mkdir -p \"${REMOTE_DIR}\""
 "${SCP_BASE[@]}" -r "${LOCAL_DIR}" "${USER}@${SERVER}:${REMOTE_DIR}"
 
-echo "Installing API packages"
+echo "Installing miniconda..."
 
 "${SSH_BASE[@]}" \
 "sudo apt update && \
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-bash ~/Miniconda3-latest-Linux-x86_64.sh -b -p ~/miniconda3 -f && \
+if [ ! -d \"\$HOME/miniconda3\" ]; then
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p \$HOME/miniconda3 && \
+    rm /tmp/miniconda.sh
+fi && \
 sudo apt install -y tmux"
 
-echo "Creating python virtual environment and intalling libraries"
+echo "Creating conda environment and intalling libraries"
 
 "${SSH_BASE[@]}" \
-"cd \"${REMOTE_DIR}\" && \
-source ~/miniconda3/bin/activate && \
-conda create --name venv python=3.13 --file requirements.txt --no-cache-dir"
+"source \$HOME/miniconda3/etc/profile.d/conda.sh && \
+conda env remove -y -n venv || true && \
+conda create -y -n venv python=3.13 && \
+conda activate venv && \
+pip install --upgrade pip --no-cache-dir && \
+pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
 
 echo "Starting frontend app"
 
 "${SSH_BASE[@]}" \
-"sudo fuser -k ${FRONTEND_PORT}/tcp || true && \
+"source \$HOME/miniconda3/etc/profile.d/conda.sh && \
+sudo fuser -k ${FRONTEND_PORT}/tcp || true && \
 tmux kill-session -t frontend-11 || true && \
 tmux new-session -d -s frontend-11 && \
-tmux send-keys -t frontend-11 'cd ${REMOTE_DIR} && \
-source ~/miniconda3/bin/activate && \
-conda activate venv && \
-streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}' Enter"
+tmux send-keys -t frontend-11 'source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}' Enter"
 
 echo "Done"

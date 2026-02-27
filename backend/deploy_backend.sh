@@ -23,34 +23,35 @@ echo "Copying backend files to remote server..."
 "${SSH_BASE[@]}" "rm -rf \"${REMOTE_DIR}\" && mkdir -p \"${REMOTE_DIR}\""
 "${SCP_BASE[@]}" -r "${LOCAL_DIR}" "${USER}@${SERVER}:${REMOTE_DIR}"
 
-echo "Installing API packages"
+echo "Installing miniconda..."
 
 "${SSH_BASE[@]}" \
 "sudo apt update && \
-wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
-bash ~/Miniconda3-latest-Linux-x86_64.sh -b -p ~/miniconda3 -f && \
+if [ ! -d \"\$HOME/miniconda3\" ]; then
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p \$HOME/miniconda3 && \
+    rm /tmp/miniconda.sh
+fi && \
 sudo apt install -y tmux"
 
-echo "Creating python virtual environment and intalling libraries"
+echo "Creating conda environment and intalling libraries"
 
 "${SSH_BASE[@]}" \
-"cd \"${REMOTE_DIR}\" && \
-source ~/miniconda3/bin/activate && \
-conda tos accept && \
-conda update -n base -c defaults conda && \
-conda install -c conda-forge conda-libmamba-solver && \
-conda create --name venv python=3.13 --file requirements.txt"
+"source \$HOME/miniconda3/etc/profile.d/conda.sh && \
+conda env remove -y -n venv || true && \
+conda create -y -n venv python=3.13 && \
+conda activate venv && \
+pip install --upgrade pip --no-cache-dir && \
+pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
 
 echo "Starting backend app"
 
 "${SSH_BASE[@]}" \
-"pkill -f uvicorn || true && \
+"source \$HOME/miniconda3/etc/profile.d/conda.sh && \
+pkill -f uvicorn || true && \
 sudo fuser -k ${BACKEND_PORT}/tcp || true && \
 tmux kill-session -t backend-11 || true && \
 tmux new-session -d -s backend-11 && \
-tmux send-keys -t backend-11 'cd ${REMOTE_DIR} && \
-source ~/miniconda3/bin/activate && \
-conda activate venv && \
-uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT} --reload' Enter"
+tmux send-keys -t backend-11 'source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT} --reload' Enter"
 
 echo "Done"
