@@ -27,14 +27,17 @@ echo "Installing API packages"
 
 "${SSH_BASE[@]}" \
 "sudo apt update && \
-sudo apt install -y tmux python3 python3-venv python3-pip"
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+bash ~/Miniconda3-latest-Linux-x86_64.sh && \
+source ~/.bashrc && \
+sudo apt install -y tmux"
 
 echo "Creating python virtual environment and intalling libraries"
 
 "${SSH_BASE[@]}" \
 "cd \"${REMOTE_DIR}\" && \
-python3 -m venv venv && \
-source venv/bin/activate && \
+conda create --name venv python=3.13 -y && \
+conda activate venv && \
 pip install --upgrade pip --no-cache-dir && \
 pip install -r requirements.txt --no-cache-dir"
 
@@ -45,7 +48,7 @@ echo "Starting frontend app"
 tmux kill-session -t frontend-11 || true && \
 tmux new-session -d -s frontend-11 && \
 tmux send-keys -t frontend-11 'cd ${REMOTE_DIR} && \
-source venv/bin/activate && \
+conda activate venv && \
 streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}' Enter"
 
 echo "Done"
