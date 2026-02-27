@@ -46,12 +46,13 @@ pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
 
 echo "Starting backend app"
 
-"${SSH_BASE[@]}" \
-"source \$HOME/miniconda3/etc/profile.d/conda.sh && \
-pkill -f uvicorn || true && \
-sudo fuser -k ${BACKEND_PORT}/tcp || true && \
-tmux kill-session -t backend-11 || true && \
-tmux new-session -d -s backend-11 && \
-tmux send-keys -t backend-11 'source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT} --reload' Enter"
+"${SSH_BASE[@]}" bash << ENDSSH
+source \$HOME/miniconda3/etc/profile.d/conda.sh
+pkill -f uvicorn || true
+sudo fuser -k ${BACKEND_PORT}/tcp || true
+tmux kill-session -t backend-11 || true
+tmux new-session -d -s backend-11
+tmux send-keys -t backend-11 "source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT} --reload" Enter
+ENDSSH
 
 echo "Done"
