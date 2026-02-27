@@ -36,6 +36,7 @@ echo "Creating python virtual environment and intalling libraries"
 "${SSH_BASE[@]}" \
 "cd \"${REMOTE_DIR}\" && \
 source ~/miniconda3/bin/activate && \
+conda tos accept && \
 conda create --name venv python=3.13 --file requirements.txt"
 
 echo "Starting backend app"
