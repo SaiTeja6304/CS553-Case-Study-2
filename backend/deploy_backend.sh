@@ -15,36 +15,38 @@ KEY_PATH="./ssh_keys/secure_key"
 LOCAL_DIR="./CS553-Case-Study-2/backend/."
 REMOTE_DIR="./CS553-Case-Study-2/backend"
 
-SCP_BASE = (scp -i "${KEY_PATH}" -P "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${USER}"@"${SERVER}")
-
-echo "Performing SSH"
-
-ssh -i "${KEY_PATH}" -p "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${USER}"@"${SERVER}"
+SCP_BASE=(scp -i "${KEY_PATH}" -P "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null)
+SSH_BASE=(ssh -i "${KEY_PATH}" -p "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${USER}"@"${SERVER}")
 
 echo "Copying backend files to remote server..."
 
-rm -rf \"${REMOTE_DIR}\" && mkdir -p \"${REMOTE_DIR}\"
+"${SSH_BASE[@]}" "rm -rf \"${REMOTE_DIR}\" && mkdir -p \"${REMOTE_DIR}\""
 "${SCP_BASE[@]}" -r "${LOCAL_DIR}" "${USER}@${SERVER}:${REMOTE_DIR}"
 
 echo "Installing API packages"
 
-sudo apt update
-sudo apt install -y tmux python3 python3-venv python3-pip
+"${SSH_BASE[@]}" \
+"sudo apt update && \
+sudo apt install -y tmux python3 python3-venv python3-pip"
 
 echo "Creating python virtual environment and intalling libraries"
 
-cd "${REMOTE_DIR}"
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip --no-cache-dir
-pip install -r requirements.txt --no-cache-dir
+"${SSH_BASE[@]}" \
+"cd \"${REMOTE_DIR}\" && \
+python3 -m venv venv && \
+source venv/bin/activate && \
+pip install --upgrade pip --no-cache-dir && \
+pip install -r requirements.txt --no-cache-dir"
 
 echo "Starting backend app"
 
-pkill -f uvicorn || true
-sudo fuser -k ${BACKEND_PORT}/tcp || true
-tmux kill-session -t backend-11 || true
-tmux new -d -s backend-11
-uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT} --reload
+"${SSH_BASE[@]}" \
+"pkill -f uvicorn || true && \
+sudo fuser -k ${BACKEND_PORT}/tcp || true && \
+tmux kill-session -t backend-11 || true && \
+tmux new-session -d -s backend-11 && \
+tmux send-keys -t backend-11 'cd ${REMOTE_DIR} && \
+source venv/bin/activate && \
+uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT} --reload' Enter"
 
 echo "Done"

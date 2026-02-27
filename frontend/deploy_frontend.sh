@@ -15,35 +15,37 @@ KEY_PATH="./ssh_keys/group_key"
 LOCAL_DIR="./CS553-Case-Study-2/frontend/."
 REMOTE_DIR="./CS553-Case-Study-2/frontend"
 
-SCP_BASE = (scp -i "${KEY_PATH}" -P "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${USER}"@"${SERVER}")
-
-echo "Performing SSH"
-
-ssh -i "${KEY_PATH}" -p "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${USER}"@"${SERVER}"
+SCP_BASE=(scp -i "${KEY_PATH}" -P "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null)
+SSH_BASE=(ssh -i "${KEY_PATH}" -p "${PORT}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null "${USER}"@"${SERVER}")
 
 echo "Copying frontend files to remote server..."
 
-rm -rf \"${REMOTE_DIR}\" && mkdir -p \"${REMOTE_DIR}\"
+"${SSH_BASE[@]}" "rm -rf \"${REMOTE_DIR}\" && mkdir -p \"${REMOTE_DIR}\""
 "${SCP_BASE[@]}" -r "${LOCAL_DIR}" "${USER}@${SERVER}:${REMOTE_DIR}"
 
 echo "Installing API packages"
 
-sudo apt update
-sudo apt install -y tmux python3 python3-venv python3-pip
+"${SSH_BASE[@]}" \
+"sudo apt update && \
+sudo apt install -y tmux python3 python3-venv python3-pip"
 
 echo "Creating python virtual environment and intalling libraries"
 
-cd "${REMOTE_DIR}"
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip --no-cache-dir
-pip install -r requirements.txt --no-cache-dir
+"${SSH_BASE[@]}" \
+"cd \"${REMOTE_DIR}\" && \
+python3 -m venv venv && \
+source venv/bin/activate && \
+pip install --upgrade pip --no-cache-dir && \
+pip install -r requirements.txt --no-cache-dir"
 
 echo "Starting frontend app"
 
-sudo fuser -k ${FRONTEND_PORT}/tcp || true
-tmux kill-session -t frontend-11 || true
-tmux new -d -s frontend-11
-streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}
+"${SSH_BASE[@]}" \
+"sudo fuser -k ${FRONTEND_PORT}/tcp || true && \
+tmux kill-session -t frontend-11 || true && \
+tmux new-session -d -s frontend-11 && \
+tmux send-keys -t frontend-11 'cd ${REMOTE_DIR} && \
+source venv/bin/activate && \
+streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}' Enter"
 
 echo "Done"

@@ -5,7 +5,7 @@ st.set_page_config(page_title="VLM Chat", page_icon=":robot_face:", layout="wide
 st.title("VLM Chat")
 
 API_PORT = "9011"
-API_SERVER = f"http://localhost:9011"
+API_SERVER = f"http://paffenroth-23.dyn.wpi.edu:{API_PORT}"
 HTTP_MAX_TIMEOUT_SECONDS = "600"
 
 if "chat_history" not in st.session_state:
