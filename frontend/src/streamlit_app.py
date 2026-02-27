@@ -22,6 +22,15 @@ with st.sidebar:
     with st.expander("Model Selection"):
         use_local_model = st.checkbox("Use local model", value=False)
         st.info("Selecting local model will run the model locally (responses may take longer to generate).", icon="ℹ️")
+    with st.expander("API Status", expanded=True):
+        try:
+            response = requests.get(API_SERVER + "/api/", timeout=10)
+            if response.status_code == 200:
+                st.info("VLM Chat API is running", icon="✅")
+            else:
+                st.error(f"VLM Chat API is not running: {response.json().get('detail', 'Unknown error')}", icon="❌")
+        except Exception as e:
+            st.error(f"VLM Chat API is not running: {e}", icon="❌")
         
 
 image = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
@@ -43,11 +52,11 @@ if query:
             if use_local_model:
                 response = requests.post(API_SERVER + "/api/generate-response-local", 
                 files={"input_img": image}, 
-                data={"query": query, "chat_history": chat_history_str})
+                data={"query": query, "chat_history": chat_history_str}, timeout=HTTP_MAX_TIMEOUT_SECONDS)
             else:
                 response = requests.post(API_SERVER + "/api/generate-response-api", 
                 files={"input_img": image}, 
-                data={"query": query, "chat_history": chat_history_str})
+                data={"query": query, "chat_history": chat_history_str}, timeout=HTTP_MAX_TIMEOUT_SECONDS)
         
         if response.status_code == 200:
             st.chat_message("assistant").markdown(response.json()["response"])
@@ -56,4 +65,4 @@ if query:
         else:
             st.error(response.json().get("detail", "Unknown error"))
 
-# streamlit run frontend/streamlit_app.py --server.port 7011 --server.address 0.0.0.0
+# streamlit run frontend/src/streamlit_app.py --server.port 7011 --server.address 0.0.0.0

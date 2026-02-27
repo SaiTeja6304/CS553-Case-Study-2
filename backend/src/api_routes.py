@@ -6,7 +6,7 @@ router = APIRouter(
    tags=["VLM Chat API"]  
 ) 
 
-@router.get("/")
+@router.get("/", status_code=200, response_model=dict)
 async def root():
     """Root endpoint for the VLM Chat API"""
     return {"message": "VLM Chat API", "status": "running"}
