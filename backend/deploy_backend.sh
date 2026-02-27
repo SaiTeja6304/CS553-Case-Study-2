@@ -37,6 +37,8 @@ echo "Creating python virtual environment and intalling libraries"
 "cd \"${REMOTE_DIR}\" && \
 source ~/miniconda3/bin/activate && \
 conda tos accept && \
+conda update -n base -c defaults conda && \
+conda install -c conda-forge conda-libmamba-solver && \
 conda create --name venv python=3.13 --file requirements.txt"
 
 echo "Starting backend app"
