@@ -6,7 +6,7 @@ from PIL import Image
 import os
 from dotenv import load_dotenv
 from fastapi import UploadFile 
-from backend.src.db import create_connection, create_table, insert_log, close_connection
+from .db import create_connection, create_table, insert_log, close_connection
 
 load_dotenv()
 
