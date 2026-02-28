@@ -11,5 +11,10 @@ Image-Text to Text chatbot
 Inference: https://huggingface.co/google/gemma-3-27b-it  
 Local: https://huggingface.co/google/gemma-3-4b-it  
 
+## Deployments
+**Backend:**
+http://paffenroth-23.dyn.wpi.edu:9011/api/
 
+**Frontend:**
+http://paffenroth-23.dyn.wpi.edu:7011/
 

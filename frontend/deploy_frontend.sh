@@ -46,11 +46,12 @@ pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
 
 echo "Starting frontend app"
 
-"${SSH_BASE[@]}" \
-"source \$HOME/miniconda3/etc/profile.d/conda.sh && \
-sudo fuser -k ${FRONTEND_PORT}/tcp || true && \
-tmux kill-session -t frontend-11 || true && \
-tmux new-session -d -s frontend-11 && \
-tmux send-keys -t frontend-11 'source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}' Enter"
+"${SSH_BASE[@]}" bash << EOF
+source \$HOME/miniconda3/etc/profile.d/conda.sh
+sudo fuser -k ${FRONTEND_PORT}/tcp || true
+tmux kill-session -t frontend-11 || true
+tmux new-session -d -s frontend-11
+tmux send-keys -t frontend-11 "source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}" Enter
+EOF
 
 echo "Done"
