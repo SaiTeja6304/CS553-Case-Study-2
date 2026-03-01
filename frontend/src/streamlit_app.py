@@ -6,7 +6,7 @@ st.title("VLM Chat")
 
 API_PORT = "9011"
 API_SERVER = f"http://paffenroth-23.dyn.wpi.edu:{API_PORT}"
-HTTP_MAX_TIMEOUT_SECONDS = 600
+HTTP_MAX_TIMEOUT_SECONDS = 2400
 
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
