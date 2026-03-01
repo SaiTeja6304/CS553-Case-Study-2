@@ -3,6 +3,7 @@ from huggingface_hub import InferenceClient
 import io
 import base64
 from PIL import Image
+import torch
 import os
 from dotenv import load_dotenv
 from fastapi import UploadFile 
@@ -20,38 +21,26 @@ async def generate_response_local(input_img: UploadFile, query: str, using_local
     #streamlit input to PIL image
     img = Image.open(input_img.file).convert("RGB")
 
-    #Changing the PIL image to bytes so we can pass it into the message
-    buffer = io.BytesIO()
-    img.save(buffer, format='PNG')
-    img_as_bytes = base64.b64encode(buffer.getvalue()).decode('utf-8')
-
     response = ""
 
     print("LOCAL")
 
     messages = [
         {
-            "role": "system",
-            "content": [{"type": "text", "text": f"Here is the conversation so far: {chat_history}. Continue the conversation naturally. \n Provide responses without using special formatting, while still being descriptive."}]
-        },
-        {
             "role": "user",
             "content": [
-                {"type": "image", "image": f"data:image/png;base64,{img_as_bytes}"},
-                {"type": "text", "text": query}
+                {"type": "image", "image": img},
+                {"type": "text", "text": f"Here is the conversation so far: {chat_history}. Answer this question, without using special formatting: {query}"}
             ]
         }
     ]
 
-    AutoConfig.from_pretrained(
-        "google/gemma-3-4b-it",
-        token=HF_TOKEN
-    )
-    
     pipe = pipeline(
         "image-text-to-text",
-        model="google/gemma-3-4b-it",
-        )
+        model="HuggingFaceTB/SmolVLM-500M-Instruct",
+        torch_dtype=torch.float32,
+        device_map="cpu"
+    )
 
     output = pipe(messages, max_new_tokens=200)
 
