@@ -51,7 +51,7 @@ pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
 
 echo "Starting frontend app"
 
-"${SSH_BASE[@]}" bash << EOF
+"${SSH_BASE[@]}" bash -l << EOF
 source \$HOME/miniconda3/etc/profile.d/conda.sh
 sudo fuser -k ${FRONTEND_PORT}/tcp || true
 tmux kill-session -t frontend-11 || true

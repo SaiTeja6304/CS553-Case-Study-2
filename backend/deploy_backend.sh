@@ -51,9 +51,9 @@ pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
 
 echo "Starting backend app"
 
-"${SSH_BASE[@]}" bash << EOF
+"${SSH_BASE[@]}" bash -l << EOF
 source \$HOME/miniconda3/etc/profile.d/conda.sh
-pkill -f uvicorn || true
+pkill -f "uvicorn src.app:app" || true
 sudo fuser -k ${BACKEND_PORT}/tcp || true
 tmux kill-session -t backend-11 || true
 tmux new-session -d -s backend-11
