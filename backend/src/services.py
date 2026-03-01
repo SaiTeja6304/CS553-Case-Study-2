@@ -27,10 +27,14 @@ async def generate_response_local(input_img: UploadFile, query: str, using_local
 
     messages = [
         {
+            "role": "system",
+            "content": [{"type": "text", "text": f"Here is the conversation so far: {chat_history}. Continue the conversation naturally. \n Provide responses without using special formatting, while still being descriptive."}]
+        },
+        {
             "role": "user",
             "content": [
                 {"type": "image", "image": img},
-                {"type": "text", "text": f"Here is the conversation so far: {chat_history}. Answer this question, without using special formatting: {query}"}
+                {"type": "text", "text": f"Answer this question: {query}"}
             ]
         }
     ]
