@@ -44,7 +44,7 @@ echo "Creating conda environment and intalling libraries"
 "${SSH_BASE[@]}" \
 "source \$HOME/miniconda3/etc/profile.d/conda.sh && \
 conda env remove -y -n venv || true && \
-conda create -y -n venv python=3.13 && \
+conda create -y -n venv python=3.11 && \
 conda activate venv && \
 pip install --upgrade pip --no-cache-dir && \
 pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
@@ -54,7 +54,9 @@ echo "Starting frontend app"
 "${SSH_BASE[@]}" bash -l << EOF
 source \$HOME/miniconda3/etc/profile.d/conda.sh
 sudo fuser -k ${FRONTEND_PORT}/tcp || true
+sleep 1
 tmux kill-session -t frontend-11 || true
+sleep 1
 tmux new-session -d -s frontend-11
 tmux send-keys -t frontend-11 "source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && streamlit run src/streamlit_app.py --server.port ${FRONTEND_PORT} --server.address ${HOST_ADDRESS}" Enter
 EOF

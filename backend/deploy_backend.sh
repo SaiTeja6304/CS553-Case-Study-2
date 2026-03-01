@@ -45,7 +45,7 @@ echo "Creating conda environment and intalling libraries"
 "${SSH_BASE[@]}" \
 "source \$HOME/miniconda3/etc/profile.d/conda.sh && \
 conda env remove -y -n venv || true && \
-conda create -y -n venv python=3.13 && \
+conda create -y -n venv python=3.11 && \
 conda activate venv && \
 pip install --upgrade pip --no-cache-dir && \
 pip install -r ${REMOTE_DIR}/requirements.txt --no-cache-dir"
@@ -55,10 +55,13 @@ echo "Starting backend app"
 "${SSH_BASE[@]}" bash -l << EOF
 source \$HOME/miniconda3/etc/profile.d/conda.sh
 pkill -f "uvicorn src.app:app" || true
+sleep 2
 sudo fuser -k ${BACKEND_PORT}/tcp || true
+sleep 1
 tmux kill-session -t backend-11 || true
+sleep 1
 tmux new-session -d -s backend-11
-tmux send-keys -t backend-11 "source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT} --reload" Enter
+tmux send-keys -t backend-11 "source \$HOME/miniconda3/etc/profile.d/conda.sh && conda activate venv && cd ${REMOTE_DIR} && uvicorn src.app:app --host ${HOST_ADDRESS} --port ${BACKEND_PORT}" Enter
 EOF
 
 echo "Done"
