@@ -22,6 +22,7 @@ echo "Copying backend files to remote server..."
 
 "${SSH_BASE[@]}" "rm -rf \"${REMOTE_DIR}\" && mkdir -p \"${REMOTE_DIR}\""
 "${SCP_BASE[@]}" -r "${LOCAL_DIR}" "${USER}@${SERVER}:${REMOTE_DIR}"
+"${SCP_BASE[@]}" "./CS553-Case-Study-2/backend/.env" "${USER}@${SERVER}:${REMOTE_DIR}/"
 
 echo "Installing miniconda..."
 
