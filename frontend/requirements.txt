@@ -1,10 +1,6 @@
-torch 
-transformers 
 pillow 
 uvicorn 
 python-multipart
 streamlit
-huggingface_hub
-accelerate
 python-dotenv
 fastapi 
