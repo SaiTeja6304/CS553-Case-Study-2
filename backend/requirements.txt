@@ -1,11 +1,13 @@
---extra-index-url https://download.pytorch.org/whl/cpu
-torch 
-transformers 
-pillow 
-uvicorn 
+--index-url https://download.pytorch.org/whl/cpu
+torch
+--extra-index-url https://pypi.org/simple
+
+transformers
+pillow
+uvicorn
 python-multipart
 streamlit
 huggingface_hub
 accelerate
 python-dotenv
-fastapi 
+fastapi
