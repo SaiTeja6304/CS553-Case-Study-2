@@ -43,6 +43,7 @@ echo "Creating conda environment and intalling libraries"
 
 "${SSH_BASE[@]}" \
 "source \$HOME/miniconda3/etc/profile.d/conda.sh && \
+conda tos accept && \
 conda env remove -y -n venv || true && \
 conda create -y -n venv python=3.11 && \
 conda activate venv && \
