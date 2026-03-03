@@ -9,7 +9,7 @@ Image-Text to Text chatbot
 
 ## Models
 Inference: https://huggingface.co/google/gemma-3-27b-it  
-Local: https://huggingface.co/google/gemma-3-4b-it  
+Local: https://huggingface.co/HuggingFaceTB/SmolVLM-500M-Instruct
 
 ## Deployments
 **Backend:**
